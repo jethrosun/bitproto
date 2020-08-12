@@ -1,0 +1,20 @@
+[package]
+name = "bitproto"
+version = "0.1.0"
+authors = ["Shuwen Jethro Sun <jethro.rules@real.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+"transmission-rpc" = "0.2.3"
+
+# reqwest = { version = "0.10.6", features = ["json", "rustls-tls"], default-features = false }
+tokio = { version = "0.2", features = ["macros"] }
+# serde = { version = "1.0", features = ["derive"] }
+# rustc-serialize = "0.3.24"
+# enum-iterator = "0.6.0"
+
+dotenv = "0.15.0"
+# log = "0.4.8"
+env_logger = "0.7.1"
