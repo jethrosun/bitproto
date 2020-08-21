@@ -15,35 +15,54 @@ set -ex
 # Man page:
 # https://manpages.debian.org/testing/transmission-cli/transmission-remote.1.en.html
 
+# Server string: "host:port --auth username:password"
+SERVER="127.0.0.1:9091 --auth transmission:mypassword"
+
+# Which torrent states should be removed at 100% progress.
+DONE_STATES=("Seeding" "Stopped" "Finished" "Idle")
+
+# Get the final server string to use.
+if [[ -n "$TRANSMISSION_SERVER" ]]; then
+    echo -n "Using server string from the environment: "
+    SERVER="$TRANSMISSION_SERVER"
+elif [[ "$#" -gt 0 ]]; then
+    echo -n "Using server string passed through parameters: "
+    SERVER="$*"
+else
+    echo -n "Using hardcoded server string: "
+fi
+echo "${SERVER: : 10}(...)"  # Truncate to not print auth.
+
+
 # -------------------------------
 #   operations we want to enable
 # -------------------------------
 
 # Set the session's maximum memory cache size in MiB. This cache is used to reduce disk IO.
-transmission-remote -n 'transmission:mypassword' --cache=0
+transmission-remote $SERVER --cache=0
 
 
 # Disable upload speed limits. If current torrent(s) are selected this operates on them. Otherwise, it changes the global setting.
-transmission-remote -n 'transmission:mypassword' --no-uplimit
+transmission-remote $SERVER --no-uplimit
 
 # Disable download speed limits. If current torrent(s) are selected this operates on them. Otherwise, it changes the global setting.
-transmission-remote -n 'transmission:mypassword' --no-downlimit
+transmission-remote $SERVER --no-downlimit
 
 # Disable uTP for peer connections. If current torrent(s) are selected this operates on them. Otherwise, it changes the global setting.
-transmission-remote -n 'transmission:mypassword' --no-utp
+transmission-remote $SERVER --no-utp
 
 # ----------------------------------
 #   Check status of transmission
 # ----------------------------------
 
 # List session information from the server
-transmission-remote -n 'transmission:mypassword' --session-info
+transmission-remote $SERVER --session-info
 
 # List statistical information from the server
-transmission-remote -n 'transmission:mypassword' --session-stats
+transmission-remote $SERVER --session-stats
 
 # List all torrents
-transmission-remote -n 'transmission:mypassword' --list
+transmission-remote $SERVER --list
 
 
 # TODO
