@@ -1,6 +1,12 @@
 #!/bin/bash
 set -ex
 
-/etc/init.d/transmission-daemon stop
+# reload config setting
+# killall -HUP transmission-da
+sudo pkill -HUP transmission-da
 
-/etc/init.d/transmission-daemon start
+# stop and restart daemon
+sudo /etc/init.d/transmission-daemon stop
+sudo /etc/init.d/transmission-daemon start
+
+sleep 5
