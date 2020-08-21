@@ -52,7 +52,25 @@ transmission-remote $SERVER --no-downlimit
 transmission-remote $SERVER --no-utp
 
 # Use directory as the default location for newly added torrents to download files to.
-transmission-remote $SERVER --download-dir /data/downloads
+transmission-remote $SERVER --download-dir=/data/downloads
+
+
+# ----------------------------------
+#   Debugging
+# ----------------------------------
+
+
+# Where to store transmission's log messages.
+transmission-remote $SERVER --logfile=/home/jethros/transmission.log
+
+# Show error messages
+transmission-remote $SERVER --log-error
+
+# Show error and info messages
+transmission-remote $SERVER --log-info
+
+# Show error, info, and debug messages
+transmission-remote $SERVER --log-debug
 
 # ----------------------------------
 #   Check status of transmission

@@ -37,9 +37,7 @@ fn main() {
 
     let mut workload_exec = true;
     // let mut torrent_list = Vec::new();
-    println!("here1");
     if workload_exec {
-        println!("here1");
         let mut rt = Runtime::new().unwrap();
         rt.block_on(add_all_torrents(
             p2p_param,

@@ -163,7 +163,7 @@ pub async fn add_all_torrents(
 
     for (pos, t) in workload.iter().enumerate() {
         println!("Torrent at position {}: {:?}", pos, t);
-        if pos >= 10 {
+        if pos >= p2p_param {
             println!("exiting with {}", pos);
             break;
         }
@@ -178,7 +178,7 @@ pub async fn add_all_torrents(
 
     while let Some(result) = futures.next().await {
         match result {
-            Ok(val) => println!("ok {:?}", val),
+            Ok(_) => println!("ok"),
             Err(e) => eprintln!("err {}", e),
         }
     }
@@ -197,7 +197,6 @@ pub async fn run_all_torrents() -> Result<()> {
         .iter()
         .map(|it| Id::Id(*it.id.as_ref().unwrap()))
         .collect();
-    println!("{:#?}", ids);
 
     let res1: RpcResponse<Nothing> = client.torrent_action(TorrentAction::Start, ids).await?;
     println!("Start result: {:?}", &res1.is_ok());
