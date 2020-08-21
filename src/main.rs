@@ -1,53 +1,50 @@
-extern crate transmission_rpc;
+extern crate core_affinity;
+extern crate crossbeam;
+extern crate futures;
+extern crate serde_json;
 
-use dotenv::dotenv;
-use std::env;
-use transmission_rpc::types::{BasicAuth, Result, RpcResponse, SessionGet};
-use transmission_rpc::types::{Id, Nothing, TorrentAction};
-use transmission_rpc::types::{TorrentAddArgs, TorrentAdded};
-use transmission_rpc::TransClient;
+use crate::utils::*;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex, RwLock};
+use std::time::{Duration, Instant};
+use tokio::runtime::Runtime;
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    dotenv().ok();
-    env_logger::init();
+mod utils;
 
-    // setup session
-    let url = env::var("TURL")?;
-    let basic_auth = BasicAuth {
-        user: env::var("TUSER")?,
-        password: env::var("TPWD")?,
-    };
-    let client = TransClient::with_auth(&url, basic_auth);
-    let response: Result<RpcResponse<SessionGet>> = client.session_get().await;
-    match response {
-        Ok(_) => println!("Yay!"),
-        Err(_) => panic!("Oh no!"),
-    }
-    println!("Rpc reqsponse is ok: {}", response?.is_ok());
+fn main() {
+    // setup for this run
+    let setup_val = read_setup("/home/jethros/setup".to_string()).unwrap();
+    let p2p_param = p2p_retrieve_param(setup_val.parse::<usize>().unwrap()).unwrap();
 
-    // remove torrent
-    let res: RpcResponse<Nothing> = client.torrent_remove(vec![Id::Id(1)], false).await?;
-    println!("Remove result: {:?}", &res.is_ok());
-
-    // add torrent
-    let add: TorrentAddArgs = TorrentAddArgs {
-        filename: Some(
-            "https://releases.ubuntu.com/20.04/ubuntu-20.04.1-desktop-amd64.iso.torrent"
-                .to_string(),
-        ),
-        ..TorrentAddArgs::default()
-    };
-    let res: RpcResponse<TorrentAdded> = client.torrent_add(add).await?;
-    println!("Add result: {:?}", &res.is_ok());
-    println!("response: {:?}", &res);
-
-    // start torrent
-    let res1: RpcResponse<Nothing> = client
-        .torrent_action(TorrentAction::Start, vec![Id::Id(1)])
-        .await?;
-    println!("Start result: {:?}", &res1.is_ok());
-
+    // Measurement code
     //
-    Ok(())
+    // NOTE: Store timestamps and calculate the delta to get the processing time for individual
+    // packet is disabled here (TOTAL_MEASURED_PKT removed)
+
+    // Workload and States for P2P NF
+    //
+    // 1, 10, 20, 40, 50, 75, 100, 150, 200
+    let workload = p2p_fetch_workload(setup_val.parse::<usize>().unwrap()).unwrap();
+    println!("{:?}", workload);
+    let mut workload = load_json(workload.to_string());
+
+    // Fixed transmission setup
+    let torrents_dir = "/home/jethros/dev/pvn/utils/workloads/torrent_files/";
+
+    let config_dir = "/data/config";
+    let download_dir = "/data/downloads";
+
+    let mut pivot = 0 as usize;
+    let now = Instant::now();
+    let mut start = Instant::now();
+
+    let mut workload_exec = true;
+    // let mut torrent_list = Vec::new();
+
+    if workload_exec {
+        let client = create_transmission_client().unwrap();
+        let mut rt = Runtime::new().unwrap();
+        rt.block_on(run_all_torrents(p2p_param, client, workload.clone()));
+        workload_exec = false;
+    }
 }

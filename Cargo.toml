@@ -16,5 +16,9 @@ tokio = { version = "0.2", features = ["macros"] }
 # enum-iterator = "0.6.0"
 
 dotenv = "0.15.0"
-# log = "0.4.8"
 env_logger = "0.7.1"
+serde_json = "*"
+futures = "*"
+core_affinity = "*"
+crossbeam = "*"
+# log = "0.4.8"
