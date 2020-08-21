@@ -31,20 +31,22 @@ fn main() {
     // Fixed transmission setup
     let torrents_dir = "/home/jethros/dev/pvn/utils/workloads/torrent_files/";
 
-    let config_dir = "/data/config";
-    let download_dir = "/data/downloads";
-
     let mut pivot = 0 as usize;
     let now = Instant::now();
     let mut start = Instant::now();
 
     let mut workload_exec = true;
     // let mut torrent_list = Vec::new();
-
+    println!("here1");
     if workload_exec {
-        let client = create_transmission_client().unwrap();
+        println!("here1");
         let mut rt = Runtime::new().unwrap();
-        rt.block_on(run_all_torrents(p2p_param, client, workload.clone()));
+        rt.block_on(add_all_torrents(
+            p2p_param,
+            workload.clone(),
+            torrents_dir.to_string(),
+        ));
+        rt.block_on(run_all_torrents());
         workload_exec = false;
     }
 }
