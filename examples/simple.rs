@@ -1,53 +1,32 @@
-extern crate transmission_rpc;
+extern crate shell_words;
+use std::io::Result;
 
-use dotenv::dotenv;
-use std::env;
-use transmission_rpc::types::{BasicAuth, Result, RpcResponse, SessionGet};
-use transmission_rpc::types::{Id, Nothing, TorrentAction};
-use transmission_rpc::types::{TorrentAddArgs, TorrentAdded};
-use transmission_rpc::TransClient;
+/// Run BitTorrent jobs via deluge console
+pub fn bt_run_torrents(workload: &str, num_of_torrents: usize) -> Result<()> {
+    for i in 1..(num_of_torrents + 1) {
+        let mut argv = Vec::new();
+        argv.push("deluge-console".to_string());
+        argv.push("-c".to_string());
+        argv.push("/home/jethros/bt_data/config".to_string());
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    dotenv().ok();
-    env_logger::init();
+        // let s =
+        //     "\"add  $HOME/dev/pvn/utils/workloads/torrent_files/img".to_owned() + &i.to_string() + "_secret.torrent\"";
+        let s = "add  $HOME/dev/pvn/utils/workloads/torrent_files/img".to_owned()
+            + &i.to_string()
+            + "_secret.torrent";
+        argv.push(s);
+        println!("Executing: {}", shell_words::join(&argv));
 
-    // setup session
-    let url = env::var("TURL")?;
-    let basic_auth = BasicAuth {
-        user: env::var("TUSER")?,
-        password: env::var("TPWD")?,
-    };
-    let client = TransClient::with_auth(&url, basic_auth);
-    let response: Result<RpcResponse<SessionGet>> = client.session_get().await;
-    match response {
-        Ok(_) => println!("Yay!"),
-        Err(_) => panic!("Oh no!"),
+        // std::process::Command::new(&argv[0])
+        //     .args(&argv[1..])
+        //     .spawn()
+        //     .expect("failed to start subprocess");
     }
-    println!("Rpc reqsponse is ok: {}", response?.is_ok());
 
-    // remove torrent
-    let res: RpcResponse<Nothing> = client.torrent_remove(vec![Id::Id(1)], false).await?;
-    println!("Remove result: {:?}", &res.is_ok());
-
-    // add torrent
-    let add: TorrentAddArgs = TorrentAddArgs {
-        filename: Some(
-            "https://releases.ubuntu.com/20.04/ubuntu-20.04.1-desktop-amd64.iso.torrent"
-                .to_string(),
-        ),
-        ..TorrentAddArgs::default()
-    };
-    let res: RpcResponse<TorrentAdded> = client.torrent_add(add).await?;
-    println!("Add result: {:?}", &res.is_ok());
-    println!("response: {:?}", &res);
-
-    // start torrent
-    let res1: RpcResponse<Nothing> = client
-        .torrent_action(TorrentAction::Start, vec![Id::Id(1)])
-        .await?;
-    println!("Start result: {:?}", &res1.is_ok());
-
-    //
     Ok(())
+}
+
+fn main() {
+    let bt = bt_run_torrents("bogus", 3);
+    //
 }
